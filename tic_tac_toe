@@ -1,0 +1,92 @@
+import random
+
+# Function to print the Tic-Tac-Toe board
+def print_board(board):
+    for row in board:
+        print(" | ".join(row))
+        print("-" * 5)
+
+# Function to check if a player has won
+def check_winner(board, player):
+    # Check rows and columns
+    for i in range(3):
+        if all([board[i][j] == player for j in range(3)]) or all([board[j][i] == player for j in range(3)]):
+            return True
+    # Check diagonals
+    if all([board[i][i] == player for i in range(3)]) or all([board[i][2-i] == player for i in range(3)]):
+        return True
+    return False
+
+# Function to check if the board is full (draw condition)
+def is_board_full(board):
+    return all([cell != " " for row in board for cell in row])
+
+# Function to get a valid move from the player
+def get_valid_move(board):
+    while True:
+        move = input("Enter your move (row col): ")
+        try:
+            row, col = map(int, move.split())
+            if 1 <= row <= 3 and 1 <= col <= 3 and board[row - 1][col - 1] == " ":
+                return row - 1, col - 1
+            else:
+                print("Invalid move! Try again.")
+        except ValueError:
+            print("Invalid input! Please enter row and column numbers separated by a space.")
+
+# Function to get the AI player's move using the hill-climbing algorithm
+def get_ai_move(board, player):
+    best_score = -float('inf')
+    best_move = None
+
+    for i in range(3):
+        for j in range(3):
+            if board[i][j] == " ":
+                board[i][j] = player
+                score = evaluate_board(board, player)
+                board[i][j] = " "
+                if score > best_score:
+                    best_score = score
+                    best_move = (i, j)
+
+    return best_move
+
+# Function to evaluate the board state for the AI player
+def evaluate_board(board, player):
+    if check_winner(board, player):
+        return 1
+    elif check_winner(board, "X" if player == "O" else "O"):
+        return -1
+    else:
+        return 0
+
+# Function to play the Tic-Tac-Toe game
+def play_game():
+    board = [[" " for _ in range(3)] for _ in range(3)]
+    players = ["X", "O"]
+    turn = 0
+
+    while True:
+        print_board(board)
+        player = players[turn % 2]
+
+        if player == "X":
+            row, col = get_valid_move(board)
+        else:
+            row, col = get_ai_move(board, player)
+
+        board[row][col] = player
+
+        if check_winner(board, player):
+            print_board(board)
+            print(f"Player {player} wins!")
+            break
+        elif is_board_full(board):
+            print_board(board)
+            print("It's a draw!")
+            break
+
+        turn += 1
+
+# Start the game
+play_game()
